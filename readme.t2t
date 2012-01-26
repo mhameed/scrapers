@@ -1,0 +1,16 @@
+= scrapers =
+Various scripts to dump online texts into readable forms, so that they can be read using your favorite pager.
+
+Resorted to finding these solutions, since reading with [Orca http://live.gnome.org/Orca] and firefox can be sluggish.
+
+
+
+== theRegister.sh ==
+todo: dump comments?
+ 
+
+== xkcd ==
+
+The xkcd website uses a div with displaystyle=none, which also seem to hide the transcription from the 
+screenreader. This is a small python script to grab/prettyfy the transcription text.
+
