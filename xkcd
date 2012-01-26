@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# The xkcd transcription grabber script.
+# Copyright (C) 2012 by Mesar Hameed
+# GPL v2, licence - feel free to use or modify, with original attribution.
+#
+# htttp://github.com/mhameed/scrapers.git
+
+import re
+import sys
+from time import sleep
+from urllib import urlopen
+from HTMLParser import HTMLParser
+try:
+    from BeautifulSoup import BeautifulSoup
+except:
+    print "Please install python-beautifulsoup"
+    sys.exit(1)
+
+def usage():
+    print "xkcd - xkcd transcription grabber"
+    print "Discription: prints the link to the comic, the title text, and any transcription."
+    print "\txkcd 1000, will grab the 1000th strip."
+    print "\txkcd 10 20, will grab strips 10 through 20."
+    sys.exit(1)
+
+if ( (len(sys.argv) == 3 and not (sys.argv[1].isdigit() and sys.argv[2].isdigit() ) ) or
+     (len(sys.argv) == 2 and not sys.argv[1].isdigit() ) or
+     (len(sys.argv) == 1)
+   ):
+    usage()
+
+
+def getXKCD(id):
+    xkcd_url = 'http://www.xkcd.com/%d' %id
+    header = "----- %s -----\n" %xkcd_url
+    footer = "\n\n"
+    f = urlopen(xkcd_url)
+    soup = BeautifulSoup(f.read())
+    f.close()
+    div = soup.find('div', id='transcript')
+    hp = HTMLParser()
+    try:
+        lnk = soup.findAll('img', attrs={'title':True})[0]
+        imgText = "img: "+ lnk.attrMap['src']+ "\ntitle: " + lnk.attrMap['title'] + "\n"
+    except:
+        imgText = "TranscriptionWarning: comic image not found.\n"
+    if not div:
+        return header + imgText+ "TranscriptionWarning: transcription div not found."+ footer
+    if not div.text:
+        return header+ imgText+ "TranscriptionWarning: no transcription text."+ footer
+
+    return header+ imgText+ "Transcription:\n" + hp.unescape(div.text) +footer
+
+
+if len(sys.argv) == 3:
+    # making sure python knows standard out is happy about utf8.
+    for i in range(int(sys.argv[1]), int(sys.argv[2])+ 1):
+        sys.stdout.write(getXKCD(i).encode('utf-8'))
+        # Make sure we are not too demanding.
+        sleep(2)
+else:
+    sys.stdout.write(getXKCD(int(sys.argv[1])).encode('utf-8'))
+
